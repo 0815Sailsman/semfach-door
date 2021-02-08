@@ -2,5 +2,5 @@
  X 2x Servo
  X 1x ESP 32
  X 2x Numberfield
-
+ Y Baumaterial
  => Done ^^
