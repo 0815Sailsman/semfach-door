@@ -1,0 +1,9 @@
+O Kurzer Überblick / Gliederung Dokument
+O Erster Prototyp
+O ESP32 lernen
+    O Basic HTML hosten
+    O Dazu verbinden
+    O Datenbank hosten
+    O Datenbank mit Seite connecten
+    O Datenbank richtig aufsetzen
+    O Richtige HTML-Seite aufsetzen -> Read & Write Capability

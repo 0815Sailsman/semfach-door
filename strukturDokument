@@ -1,0 +1,39 @@
+Deckblatt
+    Adresse der Schule
+    Thema
+    Untertitel
+    Autoren
+    Projektbegleiter
+    Abgabedatum
+    Zeitraum
+
+Inhaltsverzeichnis
+    Idee
+        Kurze Erklärung unseres Projekts
+        Hintergrund / Motivation
+        Nutzen
+    Theoretische Umsetzung
+        Kurzer Überblick über generelle Zusammensetzung (Servo etc)
+            Mikrocontroller für Steuerung
+            Extra-Mikrocontroller für
+            Servo für Türsimulation
+            Tastenfeld für CodeEingabe
+            Bildschirm um Eingabe darzustllen
+            SignalLeuchte zur Signalisierung ob der Einlogprozess erflorgreich war
+        Automatenmodellierung
+            Kurzes Diagramm
+            Erklärung warum welche Struktur
+    Praktische Umsetzung
+        Tatsächlich gewählte Bauteile
+            Arduino Uno
+            ESP32 für die Datenbank und für die Registrierung
+        Schaltplan
+            Kurzes Diagramm
+            Was ist zu sehen
+            Wie ist das verbunden
+            Warum ist das so verbunden
+        Bauvorgang
+    Testphase
+    Fazit
+    Quellen
+
