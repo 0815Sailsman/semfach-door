@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AUTOMATON>
+    <TYPE value="MEALY"/>
+    <ALPHABET>
+        <ITEM value="Code draußen"/>
+        <ITEM value="Code drinnen"/>
+        <ITEM value="Eingabe Außen"/>
+        <ITEM value="Eingabe Innen"/>
+        <ITEM value="Genug Platz"/>
+        <ITEM value="Lichtschranke passiert"/>
+        <ITEM value="Nicht registriert"/>
+        <ITEM value="Registriert"/>
+        <ITEM value="Zu viele Personen"/>
+    </ALPHABET>
+    <OUTPUTALPHABET>
+        <ITEM value="-"/>
+        <ITEM value="Du bist nicht registriert"/>
+        <ITEM value="Falscher Code"/>
+        <ITEM value="Schranke aufmachen"/>
+        <ITEM value="Schranke zu und Zähler hoch"/>
+        <ITEM value="Schranke zu und Zähler runter"/>
+        <ITEM value="Zu viele Personen drinnen"/>
+    </OUTPUTALPHABET>
+    <STATE name="main" finalstate="false">
+        <TRANSITION target="code vorhande">
+            <LABEL read="Eingabe Außen" output="-"/>
+        </TRANSITION>
+        <TRANSITION target="code vorhanden">
+            <LABEL read="Eingabe Innen" output="-"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="code vorhande" finalstate="false">
+        <TRANSITION target="code registriert">
+            <LABEL read="Registriert" output="-"/>
+        </TRANSITION>
+        <TRANSITION target="main">
+            <LABEL read="Nicht registriert" output="Du bist nicht registriert"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="code vorhanden" finalstate="false">
+        <TRANSITION target="_code registriert">
+            <LABEL read="Registriert" output="-"/>
+        </TRANSITION>
+        <TRANSITION target="main">
+            <LABEL read="Nicht registriert" output="Du bist nicht registriert"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="code registriert" finalstate="false">
+        <TRANSITION target="person nicht innen">
+            <LABEL read="Code draußen" output="-"/>
+        </TRANSITION>
+        <TRANSITION target="main">
+            <LABEL read="Code drinnen" output="Falscher Code"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="_code registriert" finalstate="false">
+        <TRANSITION target="main">
+            <LABEL read="Code draußen" output="Falscher Code"/>
+        </TRANSITION>
+        <TRANSITION target="q_1">
+            <LABEL read="Code drinnen" output="Schranke aufmachen"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="person nicht innen" finalstate="false">
+        <TRANSITION target="main">
+            <LABEL read="Zu viele Personen" output="Zu viele Personen drinnen"/>
+        </TRANSITION>
+        <TRANSITION target="q_0">
+            <LABEL read="Genug Platz" output="Schranke aufmachen"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="q_0" finalstate="false">
+        <TRANSITION target="main">
+            <LABEL read="Lichtschranke passiert" output="Schranke zu und Zähler hoch"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="q_1" finalstate="false">
+        <TRANSITION target="main">
+            <LABEL read="Lichtschranke passiert" output="Schranke zu und Zähler runter"/>
+        </TRANSITION>
+    </STATE>
+    <INITIALSTATE value="main"/>
+    <LAYOUT>
+        <STATELAYOUT name="main">
+            <LEFT value="135"/>
+            <TOP value="250"/>
+            <TRANSITIONLAYOUT target="code vorhande" drawvertical="true">
+                <LEFT value="-68"/>
+                <TOP value="-88"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="code vorhanden" drawvertical="true">
+                <LEFT value="78"/>
+                <TOP value="-88"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <STATELAYOUT name="code vorhande">
+            <LEFT value="260"/>
+            <TOP value="99"/>
+            <TRANSITIONLAYOUT target="code registriert" drawvertical="true"/>
+            <TRANSITIONLAYOUT target="main" drawvertical="true">
+                <LEFT value="72"/>
+                <TOP value="91"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <STATELAYOUT name="code vorhanden">
+            <LEFT value="260"/>
+            <TOP value="462"/>
+            <TRANSITIONLAYOUT target="_code registriert" drawvertical="true"/>
+            <TRANSITIONLAYOUT target="main" drawvertical="true">
+                <LEFT value="-80"/>
+                <TOP value="85"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <STATELAYOUT name="code registriert">
+            <LEFT value="502"/>
+            <TOP value="99"/>
+            <TRANSITIONLAYOUT target="person nicht innen" drawvertical="true"/>
+            <TRANSITIONLAYOUT target="main" drawvertical="true"/>
+        </STATELAYOUT>
+        <STATELAYOUT name="_code registriert">
+            <LEFT value="502"/>
+            <TOP value="462"/>
+            <TRANSITIONLAYOUT target="main" drawvertical="true"/>
+            <TRANSITIONLAYOUT target="q_1" drawvertical="true"/>
+        </STATELAYOUT>
+        <STATELAYOUT name="person nicht innen">
+            <LEFT value="741"/>
+            <TOP value="99"/>
+            <TRANSITIONLAYOUT target="main" drawvertical="true"/>
+            <TRANSITIONLAYOUT target="q_0" drawvertical="true"/>
+        </STATELAYOUT>
+        <STATELAYOUT name="q_0">
+            <LEFT value="908"/>
+            <TOP value="201"/>
+            <TRANSITIONLAYOUT target="main" drawvertical="true"/>
+        </STATELAYOUT>
+        <STATELAYOUT name="q_1">
+            <LEFT value="913"/>
+            <TOP value="333"/>
+            <TRANSITIONLAYOUT target="main" drawvertical="true"/>
+        </STATELAYOUT>
+        <NOTEPAD>
+            {\rtf1\ansi\ansicpg1252\deff0{\fonttbl{\f0\fnil\fcharset0 Arial;}}
+\viewkind4\uc1\pard\lang1031\fs20 
+\par }
+
+        </NOTEPAD>
+    </LAYOUT>
+</AUTOMATON>

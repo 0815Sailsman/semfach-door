@@ -1,0 +1,32 @@
+int zustand = 0
+eingabe;
+
+while eingabe
+    switch zustand:
+        case 0:
+            switch eingabe:
+                case a:
+                    reset eingabe
+                    call AAA
+                    ändere zustand
+                case b:
+                    pass
+                case c:
+                    reset eingabe
+                    call CCC
+                    ändere zustand
+        case 1:
+            pass
+        case 2:
+            pass
+
+
+AAA:
+    mach dies
+    tu das
+    eingabe = c
+
+CCC:
+    tu das  
+    mach dies
+    eingabe = b

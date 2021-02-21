@@ -1,9 +1,31 @@
-O Kurzer Überblick / Gliederung Dokument
+X Kurzer Überblick / Gliederung Dokument
 O Erster Prototyp
 O ESP32 lernen
-    O Basic HTML hosten
-    O Dazu verbinden
+    X Basic HTML hosten
+    X Dazu verbinden
     O Datenbank hosten
     O Datenbank mit Seite connecten
     O Datenbank richtig aufsetzen
     O Richtige HTML-Seite aufsetzen -> Read & Write Capability
+O Servo Stuff
+    O Servo ansteuern können
+    O 2 seperate Funktionen in Arduino
+        O 90° auf
+        O -90° zu
+O I2C Kommunikation
+    O I2C Adressen herausfinden
+    O Verbindung zwischen 2 Arduinos herstellen
+    O Daten schreiben
+    O Daten lesen
+O LCD Display
+    O Verkabelung herausfinden
+    O Daten aufs Display schreiben
+O Textfeld
+    O Mit Arduino verbinden
+    O Eingaben empfangen
+O LEDs
+    O Verkabeln
+    O An / Aus
+O RFID Karte
+    O Sensor verbinden
+    O Karte lesen

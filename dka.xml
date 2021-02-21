@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AUTOMATON>
+    <TYPE value="DKA"/>
+    <ALPHABET>
+        <ITEM value="#"/>
+        <ITEM value="0"/>
+        <ITEM value="1"/>
+        <ITEM value="2"/>
+        <ITEM value="3"/>
+        <ITEM value="4"/>
+        <ITEM value="5"/>
+        <ITEM value="6"/>
+        <ITEM value="7"/>
+        <ITEM value="8"/>
+        <ITEM value="9"/>
+        <ITEM value="a"/>
+    </ALPHABET>
+    <STACKALPHABET>
+        <ITEM value="#"/>
+        <ITEM value="*"/>
+        <ITEM value="0"/>
+        <ITEM value="1"/>
+        <ITEM value="2"/>
+        <ITEM value="3"/>
+        <ITEM value="4"/>
+        <ITEM value="5"/>
+        <ITEM value="6"/>
+        <ITEM value="7"/>
+        <ITEM value="8"/>
+        <ITEM value="9"/>
+        <ITEM value="a"/>
+    </STACKALPHABET>
+    <STATE name="q_0" finalstate="false">
+        <TRANSITION target="q_0">
+            <LABEL read="#" topofstack="*" write="*"/>
+            <LABEL read="a" topofstack="*" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_1">
+            <LABEL read="0" topofstack="*" write="*0#"/>
+            <LABEL read="1" topofstack="*" write="*1#"/>
+            <LABEL read="2" topofstack="*" write="*2#"/>
+            <LABEL read="3" topofstack="*" write="*3#"/>
+            <LABEL read="4" topofstack="*" write="*4#"/>
+            <LABEL read="5" topofstack="*" write="*5#"/>
+            <LABEL read="6" topofstack="*" write="*6#"/>
+            <LABEL read="7" topofstack="*" write="*7#"/>
+            <LABEL read="8" topofstack="*" write="*8#"/>
+            <LABEL read="9" topofstack="*" write="*9#"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="q_1" finalstate="false">
+        <TRANSITION target="q_0">
+            <LABEL read="a" topofstack="#" write="EPSILON"/>
+        </TRANSITION>
+        <TRANSITION target="q_2">
+            <LABEL read="0" topofstack="" write="0"/>
+            <LABEL read="1" topofstack="" write="1"/>
+            <LABEL read="2" topofstack="" write="2"/>
+            <LABEL read="3" topofstack="" write="3"/>
+            <LABEL read="4" topofstack="" write="4"/>
+            <LABEL read="5" topofstack="" write="5"/>
+            <LABEL read="6" topofstack="" write="6"/>
+            <LABEL read="7" topofstack="" write="7"/>
+            <LABEL read="8" topofstack="" write="8"/>
+            <LABEL read="9" topofstack="" write="8"/>
+        </TRANSITION>
+        <TRANSITION target="q_1">
+            <LABEL read="#" topofstack="#" write="#"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="q_2" finalstate="false">
+        <TRANSITION target="q_1">
+            <LABEL read="a" topofstack="0" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_2">
+            <LABEL read="#" topofstack="0" write="0"/>
+        </TRANSITION>
+        <TRANSITION target="q_3">
+            <LABEL read="0" topofstack="" write="0"/>
+            <LABEL read="1" topofstack="" write="1"/>
+            <LABEL read="2" topofstack="" write="2"/>
+            <LABEL read="3" topofstack="" write="3"/>
+            <LABEL read="4" topofstack="" write="4"/>
+            <LABEL read="5" topofstack="" write="5"/>
+            <LABEL read="6" topofstack="" write="6"/>
+            <LABEL read="7" topofstack="" write="7"/>
+            <LABEL read="8" topofstack="" write="8"/>
+            <LABEL read="9" topofstack="" write="9"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="q_3" finalstate="false">
+        <TRANSITION target="q_2">
+            <LABEL read="a" topofstack="" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_3">
+            <LABEL read="#" topofstack="" write="*"/>
+            <LABEL read="*" topofstack="" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_4">
+            <LABEL read="0" topofstack="" write="0"/>
+            <LABEL read="1" topofstack="" write="1"/>
+            <LABEL read="2" topofstack="" write="2"/>
+            <LABEL read="3" topofstack="" write="3"/>
+            <LABEL read="4" topofstack="" write="4"/>
+            <LABEL read="5" topofstack="" write="5"/>
+            <LABEL read="6" topofstack="" write="6"/>
+            <LABEL read="7" topofstack="" write="7"/>
+            <LABEL read="8" topofstack="" write="8"/>
+            <LABEL read="9" topofstack="" write="9"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="q_4" finalstate="false">
+        <TRANSITION target="q_3">
+            <LABEL read="a" topofstack="" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_4">
+            <LABEL read="*" topofstack="" write="*"/>
+        </TRANSITION>
+    </STATE>
+    <INITIALSTATE value="q_0"/>
+    <STACKINITIALCHAR value="*"/>
+    <LAYOUT>
+        <STATELAYOUT name="q_0">
+            <LEFT value="168"/>
+            <TOP value="239"/>
+            <TRANSITIONLAYOUT target="q_0" drawvertical="true">
+                <TOP value="-120"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_1" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="-192"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <STATELAYOUT name="q_1">
+            <LEFT value="323"/>
+            <TOP value="239"/>
+            <TRANSITIONLAYOUT target="q_0" drawvertical="true">
+                <TOP value="192"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_2" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="-192"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_1" drawvertical="true">
+                <TOP value="-120"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <STATELAYOUT name="q_2">
+            <LEFT value="485"/>
+            <TOP value="239"/>
+            <TRANSITIONLAYOUT target="q_1" drawvertical="true">
+                <TOP value="192"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_2" drawvertical="true">
+                <TOP value="-120"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_3" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="-192"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <STATELAYOUT name="q_3">
+            <LEFT value="648"/>
+            <TOP value="239"/>
+            <TRANSITIONLAYOUT target="q_2" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="192"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_3" drawvertical="true">
+                <TOP value="-120"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_4" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="-192"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <STATELAYOUT name="q_4">
+            <LEFT value="811"/>
+            <TOP value="239"/>
+            <TRANSITIONLAYOUT target="q_3" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="192"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_4" drawvertical="true">
+                <TOP value="-120"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <NOTEPAD>
+            {\rtf1\ansi\ansicpg1252\deff0\deflang1031{\fonttbl{\f0\fnil\fcharset0 Arial;}}
+\viewkind4\uc1\pard\fs20 
+\par }
+
+        </NOTEPAD>
+    </LAYOUT>
+</AUTOMATON>

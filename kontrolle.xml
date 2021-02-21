@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AUTOMATON>
+    <TYPE value="TM"/>
+    <ALPHABET>
+        <ITEM value="#"/>
+        <ITEM value="0"/>
+        <ITEM value="1"/>
+        <ITEM value="2"/>
+        <ITEM value="3"/>
+        <ITEM value="4"/>
+        <ITEM value="5"/>
+        <ITEM value="6"/>
+        <ITEM value="7"/>
+        <ITEM value="8"/>
+        <ITEM value="9"/>
+        <ITEM value="a"/>
+    </ALPHABET>
+    <TAPEALPHABET>
+        <ITEM value="#"/>
+        <ITEM value="*"/>
+        <ITEM value="0"/>
+        <ITEM value="1"/>
+        <ITEM value="2"/>
+        <ITEM value="3"/>
+        <ITEM value="4"/>
+        <ITEM value="5"/>
+        <ITEM value="6"/>
+        <ITEM value="7"/>
+        <ITEM value="8"/>
+        <ITEM value="9"/>
+        <ITEM value="a"/>
+    </TAPEALPHABET>
+    <STATE name="q_0" finalstate="false">
+        <TRANSITION target="q_0">
+            <LABEL read="#" direction="NONE" write="*"/>
+            <LABEL read="*" direction="NONE" write="*"/>
+            <LABEL read="a" direction="NONE" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_1">
+            <LABEL read="0" direction="RIGHT" write="0"/>
+            <LABEL read="1" direction="RIGHT" write="1"/>
+            <LABEL read="2" direction="RIGHT" write="2"/>
+            <LABEL read="3" direction="RIGHT" write="3"/>
+            <LABEL read="4" direction="RIGHT" write="4"/>
+            <LABEL read="5" direction="RIGHT" write="5"/>
+            <LABEL read="6" direction="RIGHT" write="6"/>
+            <LABEL read="7" direction="RIGHT" write="7"/>
+            <LABEL read="8" direction="RIGHT" write="8"/>
+            <LABEL read="9" direction="RIGHT" write="9"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="q_1" finalstate="false">
+        <TRANSITION target="q_0">
+            <LABEL read="a" direction="LEFT" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_1">
+            <LABEL read="#" direction="NONE" write="*"/>
+            <LABEL read="*" direction="NONE" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_2">
+            <LABEL read="0" direction="RIGHT" write="0"/>
+            <LABEL read="1" direction="RIGHT" write="1"/>
+            <LABEL read="2" direction="RIGHT" write="2"/>
+            <LABEL read="3" direction="RIGHT" write="3"/>
+            <LABEL read="4" direction="RIGHT" write="4"/>
+            <LABEL read="5" direction="RIGHT" write="5"/>
+            <LABEL read="6" direction="RIGHT" write="6"/>
+            <LABEL read="7" direction="RIGHT" write="7"/>
+            <LABEL read="8" direction="RIGHT" write="8"/>
+            <LABEL read="9" direction="RIGHT" write="8"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="q_2" finalstate="false">
+        <TRANSITION target="q_1">
+            <LABEL read="a" direction="LEFT" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_2">
+            <LABEL read="#" direction="NONE" write="*"/>
+            <LABEL read="*" direction="NONE" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_3">
+            <LABEL read="0" direction="RIGHT" write="0"/>
+            <LABEL read="1" direction="RIGHT" write="1"/>
+            <LABEL read="2" direction="RIGHT" write="2"/>
+            <LABEL read="3" direction="RIGHT" write="3"/>
+            <LABEL read="4" direction="RIGHT" write="4"/>
+            <LABEL read="5" direction="RIGHT" write="5"/>
+            <LABEL read="6" direction="RIGHT" write="6"/>
+            <LABEL read="7" direction="RIGHT" write="7"/>
+            <LABEL read="8" direction="RIGHT" write="8"/>
+            <LABEL read="9" direction="RIGHT" write="9"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="q_3" finalstate="false">
+        <TRANSITION target="q_2">
+            <LABEL read="a" direction="LEFT" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_3">
+            <LABEL read="#" direction="NONE" write="*"/>
+            <LABEL read="*" direction="NONE" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_4">
+            <LABEL read="0" direction="RIGHT" write="0"/>
+            <LABEL read="1" direction="RIGHT" write="1"/>
+            <LABEL read="2" direction="RIGHT" write="2"/>
+            <LABEL read="3" direction="RIGHT" write="3"/>
+            <LABEL read="4" direction="RIGHT" write="4"/>
+            <LABEL read="5" direction="RIGHT" write="5"/>
+            <LABEL read="6" direction="RIGHT" write="6"/>
+            <LABEL read="7" direction="RIGHT" write="7"/>
+            <LABEL read="8" direction="LEFT" write="8"/>
+            <LABEL read="9" direction="RIGHT" write="9"/>
+        </TRANSITION>
+    </STATE>
+    <STATE name="q_4" finalstate="false">
+        <TRANSITION target="q_3">
+            <LABEL read="a" direction="LEFT" write="*"/>
+        </TRANSITION>
+        <TRANSITION target="q_4">
+            <LABEL read="*" direction="NONE" write="*"/>
+        </TRANSITION>
+    </STATE>
+    <INITIALSTATE value="q_0"/>
+    <TAPEINITIALCHAR value="*"/>
+    <LAYOUT>
+        <STATELAYOUT name="q_0">
+            <LEFT value="168"/>
+            <TOP value="239"/>
+            <TRANSITIONLAYOUT target="q_0" drawvertical="true">
+                <TOP value="-120"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_1" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="-192"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <STATELAYOUT name="q_1">
+            <LEFT value="323"/>
+            <TOP value="239"/>
+            <TRANSITIONLAYOUT target="q_0" drawvertical="true">
+                <TOP value="192"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_1" drawvertical="true">
+                <TOP value="-120"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_2" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="-192"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <STATELAYOUT name="q_2">
+            <LEFT value="485"/>
+            <TOP value="239"/>
+            <TRANSITIONLAYOUT target="q_1" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="192"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_2" drawvertical="true">
+                <TOP value="-120"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_3" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="-192"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <STATELAYOUT name="q_3">
+            <LEFT value="648"/>
+            <TOP value="239"/>
+            <TRANSITIONLAYOUT target="q_2" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="192"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_3" drawvertical="true">
+                <TOP value="-120"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_4" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="-192"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <STATELAYOUT name="q_4">
+            <LEFT value="811"/>
+            <TOP value="239"/>
+            <TRANSITIONLAYOUT target="q_3" drawvertical="true">
+                <LEFT value="-1"/>
+                <TOP value="192"/>
+            </TRANSITIONLAYOUT>
+            <TRANSITIONLAYOUT target="q_4" drawvertical="true">
+                <TOP value="-120"/>
+            </TRANSITIONLAYOUT>
+        </STATELAYOUT>
+        <NOTEPAD>
+            {\rtf1\ansi\ansicpg1252\deff0\deflang1031{\fonttbl{\f0\fnil\fcharset0 Arial;}}
+\viewkind4\uc1\pard\fs20 
+\par }
+
+        </NOTEPAD>
+    </LAYOUT>
+</AUTOMATON>
