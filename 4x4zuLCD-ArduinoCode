@@ -1,0 +1,131 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <Keypad.h>
+
+LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
+
+const byte ROWS = 4; //four rows
+const byte COLS = 4; //three columns
+char keys[ROWS][COLS] = {
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'*','0','#','D'}
+};
+
+byte rowPins[ROWS] = {2, 3, 4, 5}; //connect to the row pinouts of the keypad
+byte colPins[COLS] = {6,7,8,9}; //connect to the column pinouts of the keypad
+
+Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+
+char eingabe[5] = {'#', '#', '#', '#', '#'};  //array für Code eingabe (# = unbelegt)
+boolean arrayvoll = false;                    //boolean für check, ob array voll ist
+
+long timer = 0;                               //für LCD-Refresh-rate
+long timeout = 20; //refresh rate             //für LCD-Refresh-rate
+
+
+void setup(){                                 //initialized LCD und seriellen monitor
+  lcd.init();                    
+  lcd.backlight();
+  Serial.begin(9600);
+}
+  
+void loop(){
+ 
+  char key = keypad.getKey();           //eingegebener Key wird in variable key gespeichert
+  if (key){                             
+    Serial.println(key);               //wenn key eingegebn wurde, wird dieser in die Konsole geschrieben
+  } 
+
+  if (key){                                                //wenn Eingabe erfolgt ist:
+    if (key =='A' || key =='B' || key =='C' || key=='D'){   //Unbelegte Keys
+      Serial.println("falsche Eingabe");
+      
+    } else if(key =='#') {                   //wenn Eingabe key(#) gedrückt
+      //Eingabe wird überprüft:
+      
+      if(arrayvoll) {          //wenn das array mit Zahlen voll ist, werden diese übermittelt (in Konsole geschrieben)
+        for(int i = 0; i<5; i++) {
+          Serial.print(eingabe[i]);
+        }
+        Serial.println();
+        lcd.clear();
+        lcd.setCursor(0, 0); 
+        lcd.print("Code angenommen");  //Code angenommen erscheint für 2sec auf Bildschirm
+        delay(2000);
+        lcd.clear();
+        
+      } else {                     //wenn das array nicht gefüllt ist erscheint eine Fehlernachricht
+        lcd.clear();
+        lcd.setCursor(0, 0); 
+        lcd.print("Code ungueltig");  //Code ungueltig erscheint für 2sec auf Bildschirm
+        delay(2000);
+        lcd.clear();
+      }
+      cleararray();         //array wird gecleared
+      
+    } else if(key =='*'){           //wenn löschen-key(*) gedrückt wird
+      //löscht letzte Eingabe
+      for(int i = 0; i<5; i++) {
+        if(eingabe[i] == '#' && i!=0) {  //löscht die letzte eingegebene Zahl
+          eingabe[i-1] = '#';
+          break;
+        }
+        if(i == 4){                 //wenn alles belegt ist, löscht es die letzte zahl
+          eingabe[i] = '#';
+          arrayvoll =false;
+        }
+      }
+      
+    } else {                       //wenn Zahl eingegeben wurde:
+      if(arrayvoll){               //löscht das komplette array wenn es voll war
+        cleararray();
+      }
+      
+      for(int i = 0; i<5; i++) {    //setzt die zahl an nächste freie Stelle
+        arrayvoll = true;
+        if(eingabe[i] =='#'){
+          eingabe[i] = key;
+          if(i != 4){
+            arrayvoll = false; // array ist noch nicht komplett gefüllt
+          } else{
+            arrayvoll = true;  //array ist nun komplett gefüllt
+          }
+          break;
+        }
+      }
+    }
+  }
+    
+  //print auf LCD display:
+  if(millis()> timer +timeout) {  //refreshed ~ alle 20ms
+    
+    lcd.setCursor(0, 0); // "Überschrift"
+    lcd.print("Ihr Code:");
+    lcd.setCursor(0, 1); // erste Stelle:
+    lcd.print(eingabe[0]);
+    lcd.setCursor(1, 1); // zweite Stelle:
+    lcd.print(eingabe[1]);
+    lcd.setCursor(2, 1); // dritte Stelle:
+    lcd.print(eingabe[2]);
+    lcd.setCursor(3, 1); // vierte Stelle:
+    lcd.print(eingabe[3]);
+    lcd.setCursor(4, 1); // fünfte Stelle:
+    lcd.print(eingabe[4]);
+  
+    timer = millis(); //für refresh rate
+  }
+  
+}
+
+void cleararray() {        //löscht alle eingegebenen Werte
+  for(int i = 0; i<5; i++) {
+    eingabe[i] = '#';
+  }
+}
+
+
+
+
+
