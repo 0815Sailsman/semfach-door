@@ -5,12 +5,6 @@ char band[] = {
         };
 short position = 1;
 
-char input[] = {'8', '8', '8', '8', '2'};
-bool result = TM(input);
-Serial.begin(9600);
-Serial.print("Das Ergebnis lautet: ")
-Serial.println(result);
-
 bool tm(char input[]) {
     const char NONE = 'N';
     const char LEFT = 'L';
@@ -25,11 +19,16 @@ bool tm(char input[]) {
     int next_state;
     char next_move;
     while (true) {
+      //Serial.println(band);
        read_value = band[position];
+       //Serial.print("read");
+       //Serial.println(read_value);
        write_value = get_write_value(state, read_value);
        if (write_value == '-1') {
            return false;
        }
+       //Serial.print("write");
+       //Serial.println(write_value);
        next_state = get_next_state(state, read_value);
        if (next_state == final_state) {
            return true;
@@ -37,10 +36,14 @@ bool tm(char input[]) {
        else if (next_state == -1) {
            return false;
        }
+       //Serial.print("state");
+       //Serial.println(next_state);
         next_move = get_next_move(state, read_value);
         if (next_move == '-1') {
             return false;
         }
+       //Serial.print("move");
+       //Serial.println(next_move);
         band[position] = write_value;
         state = next_state;
         if (next_move == NONE) {
@@ -58,7 +61,7 @@ bool tm(char input[]) {
 
 void write_input_to_band(char input[]) {
     short backup = position;
-    for (short i = 0; i < sizeof(input); i++) {
+    for (short i = 0; i < 5; i++) {
         band[position] = input[i];
         position++;
     }
@@ -1206,7 +1209,7 @@ int get_next_state(int state, char read){
         case '8':
             return 22;
         case '9':
-            return 2;
+            return 22;
         default:
             break;
         }
@@ -1466,7 +1469,7 @@ int get_next_state(int state, char read){
         case '9':
             return 38;
         default:
-            break;
+            return -1;
         }
     case 38:
         switch (read)
@@ -1542,7 +1545,7 @@ int get_next_state(int state, char read){
         case '0':
             return 44;
         case '1':
-            return 4;
+            return 44;
         default:
             break;
         }
@@ -1746,7 +1749,7 @@ char get_next_move(int state, char read){
         switch (read)
         {
         case '#':
-            return 'Ö';
+            return 'L';
         default:
             break;
         }
@@ -2295,4 +2298,18 @@ char get_next_move(int state, char read){
         return '-1';
     }
     return '-1';
+}
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("Los gehts...");
+  char input[5] = {'5', '3', '2', '1', '2'};
+  bool result = tm(input);
+  
+  Serial.print("Das Ergebnis lautet: ");
+  Serial.println(result);
+}
+
+void loop() {
+
 }
