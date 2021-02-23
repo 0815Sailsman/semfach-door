@@ -10,7 +10,7 @@ class TM:
         self.band.fill_with_std()
 
     def execute(self, input):
-        self.band.set_position(50)
+        self.band.set_position(1)
         self.band.write_at_start(input)
         final_states = [42]
         while self.state is not None:

@@ -9,7 +9,7 @@ class Band:
 
     def fill_with_std(self):
         self.data = list()
-        for i in range(0, 100):
+        for i in range(20):
             self.data.append(self.standard_char)
 
     def set_standard_char(self, char):
