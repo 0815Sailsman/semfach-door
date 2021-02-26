@@ -4,7 +4,9 @@ String current_msg;
 
 void setup() {
   Serial.begin(9600);
-  current_msg = "12341|";
+  randomSeed(analogRead(0));
+  current_msg = "" + (String)genCode() + "|";
+  Serial.println(current_msg);
   Wire.begin(9);
   Wire.onReceive(receiveEvent);
 }
@@ -35,9 +37,26 @@ void receiveEvent(int bytes) {
     //append false
     //save to db
    // get new ode that is not already in db
-   // start new current_msg 
+    current_msg = "" + (String)genCode() + "|";
   }
 }
 void loop() {
 
+}
+
+long genCode() {
+  long tenthousand = 10000;
+  long random1 = random(1, 10);
+  long random2 = random(1, 10);
+  long random3 = random(1, 10);
+  long random4 = random(1, 10);
+  long finalnumber = random1 + random2 + random3 + random4;
+  while(finalnumber > 9) {
+    int finalhilfe = finalnumber /10;
+    finalnumber = finalnumber - (finalhilfe*10);
+    finalnumber = finalnumber + finalhilfe;
+  }
+  
+  long codehilf = random1*tenthousand + random2*1000 + random3*100 + random4*10 + finalnumber;
+  return codehilf;
 }
