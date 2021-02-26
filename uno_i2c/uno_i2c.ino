@@ -1,34 +1,35 @@
 #include <Wire.h>
 
 String current_msg;
-String dat;
 
 void setup() {
   Serial.begin(9600);
   current_msg = "12341|";
-  dat = "";
   Wire.begin(9);
   Wire.onReceive(receiveEvent);
 }
 void receiveEvent(int bytes) {
-  
- // Serial.println("Da ist was reingekommen... Warte kurzm");
+  int dat = "";;
   while (Wire.available()) {
-    dat += (char)Wire.read();
+    dat = Wire.read();
   }
-  if (dat != "\?" && dat != "\v") {
+  if (dat != 124 && dat != 167) {
+    dat = (char)dat;
     Serial.println(dat);
-    current_msg = current_msg + dat;
+    current_msg = current_msg + (char)dat;
     dat = "";
   }
-  else if (dat == "\v") {
+  else if (dat == 167) {
+    Serial.println("Wort fertig");
     current_msg = current_msg + "|";
     dat = "";
+    Serial.println(current_msg);
   }
-  else if (dat == "\?"){
-   Serial.println("yeah, we lit");
-   Serial.println(current_msg);
-   dat = "";
+  else if (dat == 124){
+    Serial.println("yeah, we lit");
+    current_msg = current_msg + "|";
+    dat = "";
+    Serial.println(current_msg);
     //append time in|
     //append time out|
     //append false
@@ -38,6 +39,5 @@ void receiveEvent(int bytes) {
   }
 }
 void loop() {
-  // put your main code here, to run repeatedly:
 
 }
