@@ -1,17 +1,24 @@
 #include <Wire.h>
+#include "RTClib.h"
 
+RTC_DS1307 rtc;
 String current_msg;
+int rtcground = 8;
+boolean has_received = false;
 
 void setup() {
+
   Serial.begin(9600);
+
   randomSeed(analogRead(0));
   current_msg = "" + (String)genCode() + "|";
   Serial.println(current_msg);
   Wire.begin(9);
   Wire.onReceive(receiveEvent);
+
 }
 void receiveEvent(int bytes) {
-  int dat = "";;
+  int dat = "";
   while (Wire.available()) {
     dat = Wire.read();
   }
@@ -28,20 +35,32 @@ void receiveEvent(int bytes) {
     Serial.println(current_msg);
   }
   else if (dat == 124){
-    Serial.println("yeah, we lit");
     current_msg = current_msg + "|";
     dat = "";
-    Serial.println(current_msg);
-    //append time in|
-    //append time out|
-    //append false
-    //save to db
-   // get new ode that is not already in db
-    current_msg = "" + (String)genCode() + "|";
+    has_received = true;
   }
 }
 void loop() {
+  if (has_received) {
+    long zeit = get_unixtime();
 
+    current_msg += (String)zeit + "|";
+    current_msg += (String)zeit + "|";
+    current_msg += "0";
+    Serial.println(current_msg);
+    //save to db
+   // get new ode that is not already in db
+    current_msg = "" + (String)genCode() + "|";
+    has_received = false;
+  }
+  delay(100);
+}
+
+long get_unixtime() {
+  rtc.begin();
+  rtc.isrunning();
+  DateTime now = rtc.now();
+  return now.unixtime();
 }
 
 long genCode() {
