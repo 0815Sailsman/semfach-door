@@ -3,11 +3,15 @@
 #include <SD.h>
 #include "RTClib.h"
 
+// TODO MAKE RECEIVE EVENT SMALLER
+
 RTC_DS1307 rtc;
 String current_msg;
 String number_to_compare;
 int rtcground = 8;
 boolean has_received = false;
+
+String msg;
 
 void setup() {
 
@@ -25,25 +29,36 @@ void setup() {
 }
 void receiveEvent(int bytes) {
   int dat = "";
+  int flag = 0;
+  int counter = 0;
   while (Wire.available()) {
     dat = Wire.read();
+    char temp = dat;
+    if (((temp == "i") || (temp == "o") && counter == 0) || flag == 1) {
+      msg += (char)dat;
+      flag = 1;
+    }
+    counter++;
   }
-  if (dat != 124 && dat != 167) {
-    dat = (char)dat;
-    Serial.println(dat);
-    current_msg = current_msg + (char)dat;
-    dat = "";
-  }
-  else if (dat == 167) {
-    Serial.println("Wort fertig");
-    current_msg = current_msg + "|";
-    dat = "";
-    Serial.println(current_msg);
-  }
-  else if (dat == 124){
-    current_msg = current_msg + "|";
-    dat = "";
-    has_received = true;
+  flag = 0;
+  if (msg == "") {
+    if (dat != 124 && dat != 167) {
+      dat = (char)dat;
+      Serial.println(dat);
+      current_msg = current_msg + (char)dat;
+      dat = "";
+    }
+    else if (dat == 167) {
+      Serial.println("Wort fertig");
+      current_msg = current_msg + "|";
+      dat = "";
+      Serial.println(current_msg);
+    }
+    else if (dat == 124){
+      current_msg = current_msg + "|";
+      dat = "";
+      has_received = true;
+    }
   }
 }
 void loop() {
@@ -60,6 +75,36 @@ void loop() {
     } while(code_already_exists(number_to_compare));
     current_msg = "" + number_to_compare + "|";
     has_received = false;
+  }
+  if (msg != "") {
+    if (msg.c_str()[0] == "i") {
+      msg = msg.substring(1);
+      if (code_already_exists(msg)) {
+        TWCR = 0;
+        Wire.begin();
+        Wire.beginTransmission(2);
+        Wire.write(0);
+        Serial.println("Gesendet");
+        Wire.endTransmission();
+        TWCR = 0;
+        Wire.begin(9);
+        msg = "";
+      }
+      else {
+        TWCR = 0;
+        Wire.begin();
+        Wire.beginTransmission(2);
+        Wire.write(1);
+        Serial.println("Gesendet");
+        Wire.endTransmission();
+        TWCR = 0;
+        Wire.begin(9);
+        msg = "";
+      }
+    }
+    else if (msg.c_str()[0] == "o") {
+      ;
+    }
   }
   delay(100);
 }

@@ -10,6 +10,7 @@ void setup() {
 void loop() {
   if (msg != "") {
     Serial.println(msg);
+    Serial.println(msg.c_str()[0]);
     TWCR = 0;
     Wire.begin();
     Wire.beginTransmission(2);
