@@ -3,10 +3,18 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <Wire.h>
+#include <SD.h>
+#include <SPI.h>
+#include "RTClib.h"
+
+
+RTC_DS1307 rtc;
+// Flag if current user is already known
+boolean flag = true;
+String number_to_compare;
 
 // Replace with your network credentials
 const char* ssid     = "ESP32-Access-Point";
-const char* password = "123456789";
 
 // Set web server port number to 80
 AsyncWebServer server(80);
@@ -17,6 +25,12 @@ String header;
 const char* PARAM_INPUT_1 = "name";
 const char* PARAM_INPUT_2 = "nname";
 const char* PARAM_INPUT_3 = "email";
+
+String inputvName;
+String inputnName;
+String inputEmail;
+
+String current_msg;
 
 // HTML web page to handle 3 input fields (input1, input2, input3)
 const char index_html[] PROGMEM = R"rawliteral(
@@ -40,15 +54,18 @@ void notFound(AsyncWebServerRequest *request) {
 void setup() {
   Serial.begin(115200);
   Wire.begin();
-
-  // Connect to Wi-Fi network with SSID and password
-  Serial.print("Setting AP (Access Point)…");
-  // Remove the password parameter, if you want the AP (Access Point) to be open
-  WiFi.softAP(ssid, password);
-
+  WiFi.softAP(ssid);
+  rtc.begin();
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
+    SD.begin(5);
+
+  randomSeed(analogRead(0));
+  do {
+     number_to_compare = (String)genCode();
+  } while(code_already_exists(number_to_compare));
+  current_msg = "" + number_to_compare + "|";  
 
     // Send web page with input fields to client
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -58,9 +75,6 @@ void setup() {
 
   // Send a GET request to <ESP_IP>/get?input1=<inputMessage>
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
-    String inputvName;
-    String inputnName;
-    String inputEmail;
     String inputParam;
     // GET input1 value on <ESP_IP>/get?input1=<inputMessage>
     if (request->hasParam(PARAM_INPUT_1) && request->hasParam(PARAM_INPUT_2) && request->hasParam(PARAM_INPUT_3)) {
@@ -73,17 +87,25 @@ void setup() {
       inputvName = "No message sent";
       inputParam = "none";
     }
-    Serial.println(inputvName);
-    Serial.println(inputnName);
-    Serial.println(inputEmail);
-
-    short chartime = 20;
-    transmit_word(inputvName, chartime);
-    transmit_word_done();
-    transmit_word(inputnName, chartime);
-    transmit_word_done();
-    transmit_word(inputEmail, chartime);
-    transmit_done();
+    long zeit = get_unixtime();
+    // Build complete string
+    current_msg += inputvName;
+    current_msg += '|';
+    current_msg += inputnName;
+    current_msg += '|';
+    current_msg += inputEmail;
+    current_msg += '|';
+    current_msg += (String)zeit;
+    current_msg += '|';
+    current_msg += (String)zeit;
+    current_msg += "|0";
+    // write the user
+    write_string_to_EOF(current_msg);
+    // Reset everything back to start
+    do {
+       number_to_compare = (String)genCode();
+    } while(code_already_exists(number_to_compare));
+    current_msg = "" + number_to_compare + "|";  
     
     request->send(200, "text/html", "HTTP GET request sent to your ESP on input field (" 
                                      + inputParam + ") with value: " + inputvName + ", " + inputnName + ", " + inputEmail + 
@@ -97,26 +119,69 @@ void setup() {
 void loop(){
 }
 
-void transmit_word(String pWord, int char_delay) {
-    for (short i = 1; i <= pWord.length(); i++) {
-      Serial.println(pWord.substring(i-1, i));
-      Wire.beginTransmission(9);
-      Wire.write(pWord.substring(i-1, i).c_str());
-      Wire.endTransmission();
-      delay(char_delay);
+void write_string_to_EOF(String to_write) {
+  File myFile = SD.open("/data.txt", FILE_WRITE);
+  if (myFile) {
+    
+    myFile.seek(myFile.size());
+    myFile.println(to_write);
+    myFile.close();
+    Serial.println("done.");
+  } else {
+    Serial.println("error opening test.txt");
+  }
+}
+
+boolean code_already_exists(String to_compare) {
+  byte next_zeichen;
+  boolean skip_flag = false;
+  String current_code;
+  File myFile = SD.open("/data.txt");
+
+  while (myFile.available()) {
+    next_zeichen = (byte)myFile.read();
+    if (next_zeichen == 124) {
+      if (!skip_flag) {
+        if (to_compare == current_code) {
+          return true;
+        }
+        Serial.println(current_code);
+        current_code = "";
+      }
+      skip_flag = true;
     }
+    if (!skip_flag) {
+      if (isDigit((char)next_zeichen)) {
+        current_code += (char)next_zeichen;
+      }
+    }
+    if (next_zeichen == 13) {
+      skip_flag = false;
+    }
+  }
+  return false;
+  myFile.close();
 }
 
-void transmit_word_done() {
-    String spacer = "§";
-    Wire.beginTransmission(9);
-    Wire.write(spacer.c_str());
-    Wire.endTransmission();
+long genCode() {
+  long tenthousand = 10000;
+  long random1 = random(1, 10);
+  long random2 = random(1, 10);
+  long random3 = random(1, 10);
+  long random4 = random(1, 10);
+  long finalnumber = random1 + random2 + random3 + random4;
+  while(finalnumber > 9) {
+    int finalhilfe = finalnumber /10;
+    finalnumber = finalnumber - (finalhilfe*10);
+    finalnumber = finalnumber + finalhilfe;
+  }
+  
+  long codehilf = random1*tenthousand + random2*1000 + random3*100 + random4*10 + finalnumber;
+  return codehilf;
 }
 
-void transmit_done() {
-    String spacer = "|";
-    Wire.beginTransmission(9);
-    Wire.write(spacer.c_str());
-    Wire.endTransmission();
+long get_unixtime() {
+  rtc.isrunning();
+  DateTime now = rtc.now();
+  return now.unixtime();
 }
