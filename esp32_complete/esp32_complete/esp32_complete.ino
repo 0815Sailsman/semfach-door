@@ -1,3 +1,4 @@
+#include <LiquidCrystal_I2C.h>
 #include <Arduino.h>
 #include <WiFi.h>
 #include <AsyncTCP.h>
@@ -7,11 +8,12 @@
 #include <SPI.h>
 #include "RTClib.h"
 
-
+LiquidCrystal_I2C lcd1(0x26, 16, 2);
+LiquidCrystal_I2C lcd2(0x27, 16, 2);
 RTC_DS1307 rtc;
-// Flag if current user is already known
-boolean flag = true;
+
 String number_to_compare;
+String received_number;
 
 // Replace with your network credentials
 const char* ssid     = "ESP32-Access-Point";
@@ -31,6 +33,9 @@ String inputnName;
 String inputEmail;
 
 String current_msg;
+
+byte person_counter = 0;
+const byte MAX_PERSONS = 20;
 
 // HTML web page to handle 3 input fields (input1, input2, input3)
 const char index_html[] PROGMEM = R"rawliteral(
@@ -54,12 +59,19 @@ void notFound(AsyncWebServerRequest *request) {
 void setup() {
   Serial.begin(115200);
   Wire.begin();
+  lcd1.init();
+  delay(20);   
+  lcd2.init();                   
+  delay(20);
+  lcd1.backlight();
+  delay(20);                    
+  lcd2.backlight();
   WiFi.softAP(ssid);
   rtc.begin();
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
-    SD.begin(5);
+  SD.begin(5);
 
   randomSeed(analogRead(0));
   do {
@@ -87,6 +99,18 @@ void setup() {
       inputvName = "No message sent";
       inputParam = "none";
     }
+    lcd1.clear();
+    lcd1.setCursor(0, 0);
+    lcd1.print("New user");
+    delay(20);
+    lcd2.clear();
+    lcd2.setCursor(0, 0);
+    lcd2.print("New user");
+    delay(3000);
+    lcd1.clear();
+    delay(20);
+    lcd2.clear();
+    
     long zeit = get_unixtime();
     // Build complete string
     current_msg += inputvName;
@@ -117,6 +141,44 @@ void setup() {
 }
 
 void loop(){
+  // ask nano 1 for new code
+  received_number = "";
+  Wire.requestFrom(8, 6);    // request 6 bytes from slave device #8
+  while (Wire.available()) { // slave may send less than requested
+    received_number += Wire.read(); // receive a byte as character
+            
+  }
+  Serial.print(received_number);
+  if (received_number != "00000") {
+    // Someone wants to get in
+    // Check db if user is registered
+    if (code_already_exists(received_number)) {
+      // Check db if user is already in
+      if (!is_inside(received_number)) {
+        // Check if person_counter is low enough for one more person to enter the building
+        if (person_counter < MAX_PERSONS) {
+          // Display confirmation
+          lcd1.clear();
+          lcd1.setCursor(0, 0);
+          lcd1.print("***Akzeptiert***");
+          lcd1.setCursor(0, 1);
+          lcd1.print("Tür wird geöffnet");
+          // Open the gates
+
+          // Wait for person to enter
+
+          // Update display
+
+          // Update db
+
+          // Change counter
+          person_counter++;
+        }
+      }
+    }
+  }
+  // ask nano 2 for new code  
+  
 }
 
 void write_string_to_EOF(String to_write) {
@@ -143,6 +205,7 @@ boolean code_already_exists(String to_compare) {
     if (next_zeichen == 124) {
       if (!skip_flag) {
         if (to_compare == current_code) {
+          myFile.close();
           return true;
         }
         Serial.println(current_code);
@@ -159,7 +222,90 @@ boolean code_already_exists(String to_compare) {
       skip_flag = false;
     }
   }
-  return false;
+  myFile.close();
+  return false;  
+}
+
+boolean is_inside(String user_string) {
+  byte next_zeichen;
+  boolean skip_flag = false;
+  String current_code;
+  File myFile = SD.open("/data.txt");
+
+  while (myFile.available()) {
+    next_zeichen = (byte)myFile.read();
+    if (next_zeichen == 124) {
+      if (!skip_flag) {
+        if (user_string == current_code) {
+          // Correct user found
+          short counter = 0;
+          // Continue reading, until you read 5 more "|"
+          do {
+            next_zeichen = (byte)myFile.read();
+            if (next_zeichen == 124) {
+              counter++;
+            }
+          } while (counter != 5);
+          boolean result = (boolean)myFile.read();
+          myFile.close();
+          return result;
+        }
+        Serial.println(current_code);
+        current_code = "";
+      }
+      skip_flag = true;
+    }
+    if (!skip_flag) {
+      if (isDigit((char)next_zeichen)) {
+        current_code += (char)next_zeichen;
+      }
+    }
+    if (next_zeichen == 13) {
+      skip_flag = false;
+    }
+  }
+  myFile.close();
+  return false;  
+}
+
+void toggle_inside(String user_string) {
+  byte next_zeichen;
+  boolean skip_flag = false;
+  String current_code;
+  File myFile = SD.open("/data.txt");
+
+  while (myFile.available()) {
+    next_zeichen = (byte)myFile.read();
+    if (next_zeichen == 124) {
+      if (!skip_flag) {
+        if (user_string == current_code) {
+          // Correct user found
+          short counter = 0;
+          // Continue reading, until you read 5 more "|"
+          do {
+            next_zeichen = (byte)myFile.read();
+            if (next_zeichen == 124) {
+              counter++;
+            }
+          } while (counter != 5);
+          boolean result = (boolean)myFile.read();
+          myFile.close();
+          return result;
+        }
+        Serial.println(current_code);
+        current_code = "";
+      }
+      skip_flag = true;
+    }
+    if (!skip_flag) {
+      if (isDigit((char)next_zeichen)) {
+        current_code += (char)next_zeichen;
+      }
+    }
+    if (next_zeichen == 13) {
+      skip_flag = false;
+    }
+  }
   myFile.close();
 }
 

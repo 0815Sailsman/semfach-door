@@ -9,7 +9,7 @@ int echoPin = 11;  //Abstandssensor
 long duration;     //Abstandssensor
 int distance;      //Abstandssensor
 
-LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
+LiquidCrystal_I2C lcd(0x26,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 
 const byte ROWS = 4; //four rows
 const byte COLS = 4; //three columns
@@ -81,6 +81,7 @@ void loop(){
           TWCR = 0;
           Wire.begin();
           Wire.beginTransmission(9);
+          Wire.write("i");
           for (short i=0; i < 5; i++) {
             Wire.write(eingabe[i]);
           }
