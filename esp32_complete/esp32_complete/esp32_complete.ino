@@ -123,15 +123,16 @@ void setup() {
     current_msg += "|0";
     // write the user
     write_string_to_EOF(current_msg);
+    // Tell user his data
+    request->send(200, "text/html", "HTTP GET request sent to your ESP on input field (" 
+                                     + inputParam + ") with value: " + inputvName + ", " + inputnName + ", " + inputEmail + 
+                                     "<br>Dein Code fuer das G.A.T.E. lautet " + number_to_compare + 
+                                     "<br><a href=\"/\">Return to Home Page</a>");
     // Reset everything back to start
     do {
        number_to_compare = (String)genCode();
     } while(code_already_exists(number_to_compare));
     current_msg = "" + number_to_compare + "|";  
-    
-    request->send(200, "text/html", "HTTP GET request sent to your ESP on input field (" 
-                                     + inputParam + ") with value: " + inputvName + ", " + inputnName + ", " + inputEmail + 
-                                     "<br><a href=\"/\">Return to Home Page</a>");
   });
   server.onNotFound(notFound);
   
@@ -174,7 +175,7 @@ void loop(){
             lcd1.setCursor(0, 0);
             lcd1.print("***Akzeptiert***");
             lcd1.setCursor(0, 1);
-            lcd1.print("Tür wird geöffnet");
+            lcd1.print("Oeffne Tuer");
             // Open the gates
             delay(2000);
             // Wait for person to enter
@@ -184,7 +185,7 @@ void loop(){
             lcd1.setCursor(0, 0);
             lcd1.print("***Drinnen***");
             lcd1.setCursor(0, 1);
-            lcd1.print("Tür wird geschlossen");
+            lcd1.print("Schliesse Tuer");
             // Update db
             toggle_user(received_number.substring(0, 5));
             // Change counter
@@ -211,7 +212,7 @@ void loop(){
     else {
       lcd1.clear();
       lcd1.setCursor(0, 0);
-      lcd1.print("Code unmöglich");
+      lcd1.print("Unmoeglich");
     }
   }
   delay(500);
@@ -248,7 +249,7 @@ void loop(){
           lcd2.setCursor(0, 0);
           lcd2.print("***Akzeptiert***");
           lcd2.setCursor(0, 1);
-          lcd2.print("Tür wird geöffnet");
+          lcd2.print("Oeffne Tuer");
           // Open the gates
           delay(2000);
           // Wait for person to enter
@@ -258,7 +259,7 @@ void loop(){
           lcd2.setCursor(0, 0);
           lcd2.print("***Draußen***");
           lcd2.setCursor(0, 1);
-          lcd2.print("Tür wird geschlossen");
+          lcd2.print("Schliesse Tuer");
           // Update db
           toggle_user(received_number.substring(0, 5));
           // Change counter
@@ -279,7 +280,7 @@ void loop(){
     else {
       lcd2.clear();
       lcd2.setCursor(0, 0);
-      lcd2.print("Code unmöglich");
+      lcd2.print("Unmoeglich");
     }
   }
   delay(500);
