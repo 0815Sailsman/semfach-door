@@ -53,8 +53,8 @@ void setup() {
   pinMode(echoPin, INPUT);   //Abstandssensor
   servo1.attach(A2);
   servo2.attach(A3);
-  servo1.write(0);
-  servo2.write(140);
+  servo1.write(50);
+  servo2.write(120);
 }
 
 void loop() {
@@ -117,8 +117,8 @@ void loop() {
 //Tür-Öffner
 void opendoor(){
   boolean turzu = false;
-  servo1.write(110); //open
-  servo2.write(30);
+  servo1.write(170); //open
+  servo2.write(20);
   if(millis() > myTimeout + myTimer && !checkSchranke){
     myTimer = millis();
     checkSchranke = true;
@@ -141,8 +141,8 @@ void opendoor(){
     checkSchranke = false;
     turauf = false;
     turzu = false;
-    servo1.write(0);   //close
-    servo2.write(140);
+    servo1.write(50);   //close
+    servo2.write(120);
   }
 }
 

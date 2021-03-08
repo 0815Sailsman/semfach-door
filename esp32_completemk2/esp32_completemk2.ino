@@ -12,7 +12,7 @@ LiquidCrystal_I2C lcd1(0x26, 16, 2);
 LiquidCrystal_I2C lcd2(0x27, 16, 2);
 RTC_DS1307 rtc;
 
-int digComAusgang = 26;
+int digComAusgang = 26; //communication via digital-Pin to nano
 int digComEingang = 27;
 
 String number_to_compare;
