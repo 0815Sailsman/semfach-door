@@ -107,7 +107,8 @@ void loop() {
   }
   //delay(50);
   //ab hier für dig-com
-  if(comPin){
+  Serial.println(digitalRead(comPin));
+  if(digitalRead(comPin)){
     turauf =true;
   }
   if(turauf){

@@ -1,4 +1,4 @@
-#include <LiquidCrystal_I2C.h>
+#include <LiquidCrystal_I2C.h> 
 #include <Arduino.h>
 #include <WiFi.h>
 #include <AsyncTCP.h>
@@ -12,8 +12,8 @@ LiquidCrystal_I2C lcd1(0x26, 16, 2);
 LiquidCrystal_I2C lcd2(0x27, 16, 2);
 RTC_DS1307 rtc;
 
-int digComAusgang = 26; //communication via digital-Pin to nano
-int digComEingang = 27;
+const byte digComAusgang = 26; //communication via digital-Pin to nano
+const byte digComEingang = 27;
 
 String number_to_compare;
 String received_number = "#####n";
@@ -37,7 +37,7 @@ String inputEmail;
 
 String current_msg;
 
-byte person_counter = 0;
+int person_counter = 0;
 const byte MAX_PERSONS = 20;
 
 char band[] = {
@@ -84,6 +84,9 @@ void setup() {
   Serial.print("AP IP address: ");
   Serial.println(IP);
   SD.begin(5);
+
+  pinMode(digComAusgang, OUTPUT);
+  pinMode(digComEingang, OUTPUT);
 
   randomSeed(analogRead(0));
   do {
@@ -181,9 +184,9 @@ void loop(){
             lcd1.print("Oeffne Tuer");
             //open doors
             digitalWrite(digComEingang, HIGH);
-            delay(100);
+            delay(1000);
             digitalWrite(digComEingang, LOW);
-            delay(1900);
+            delay(1000);
             // Wait for person to enter
   
             // Update display
@@ -258,9 +261,9 @@ void loop(){
           lcd2.print("Oeffne Tuer");
           // Open the gates
           digitalWrite(digComAusgang, HIGH);
-          delay(100);
+          delay(1000);
           digitalWrite(digComAusgang, LOW);
-          delay(1900);
+          delay(1000);
           // Wait for person to enter
 
           // Update display
