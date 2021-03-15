@@ -5,12 +5,14 @@
 Servo servo1; //servo
 Servo servo2;
 
+boolean turzu = false;
+
 int trigPin = 10; //abstandssensor
 int echoPin = 11;
 long duration;
 int distance;
 
-int comPin = A0;  //für dig-com
+int comPin = 12;  //für dig-com
 boolean turauf = false;
 boolean checkSchranke =false;
 long myTimer =0;
@@ -51,10 +53,11 @@ void setup() {
   Serial.begin(9600);
   pinMode(trigPin, OUTPUT);  //Abstandssensor
   pinMode(echoPin, INPUT);   //Abstandssensor
+  pinMode(comPin, INPUT);
   servo1.attach(A2);
   servo2.attach(A3);
-  servo1.write(50);
-  servo2.write(120);
+  servo1.write(170);
+  servo2.write(20);
 }
 
 void loop() {
@@ -104,9 +107,9 @@ void loop() {
   for(int i =0; i<5; i++) {
     lastCode[i] = eingabe[i];
   }
-  //delay(50);
+  delay(50);
   //ab hier für dig-com
-  if(comPin){
+  if(digitalRead(comPin)){
     turauf =true;
   }
   if(turauf){
@@ -116,9 +119,8 @@ void loop() {
 
 //Tür-Öffner
 void opendoor(){
-  boolean turzu = false;
-  servo1.write(170); //open
-  servo2.write(20);
+  servo1.write(50); //open
+  servo2.write(120);
   if(millis() > myTimeout + myTimer && !checkSchranke){
     myTimer = millis();
     checkSchranke = true;
@@ -135,14 +137,15 @@ void opendoor(){
     Serial.println(distance);
     if(distance < 30){
       turzu = true;
+      myTimer = millis();
     }
   }
   if(millis() > myTimeout + myTimer && turzu){
     checkSchranke = false;
     turauf = false;
     turzu = false;
-    servo1.write(50);   //close
-    servo2.write(120);
+    servo1.write(170);   //close
+    servo2.write(20);
   }
 }
 
