@@ -8,38 +8,47 @@
 #include <SPI.h>
 #include "RTClib.h"
 
+// Variablen für die Displays
 LiquidCrystal_I2C lcd1(0x26, 16, 2);
 LiquidCrystal_I2C lcd2(0x27, 16, 2);
 RTC_DS1307 rtc;
 
-const byte digComAusgang = 26; //communication via digital-Pin to nano
+// Pins für die Kommunikation mit den Nanos (für die Servos)
+const byte digComAusgang = 26;
 const byte digComEingang = 27;
 
+// Hier wird der empfangene Code von den Nanos drin gespeichert
 String number_to_compare;
 String received_number = "#####n";
 
-// Replace with your network credentials
+// Name des Wlan-Hotspots
 const char* ssid     = "ESP32-Access-Point";
 
-// Set web server port number to 80
+// Initialisierung des WebServers
 AsyncWebServer server(80);
 
-// Variable to store the HTTP request
+// Hier wird die http Anfrage drin gespeichert
 String header;
 
+// Anhand dieser Konstanten werden später die einzelnen Eingaben der Nutzer voneinander unterschieden
 const char* PARAM_INPUT_1 = "name";
 const char* PARAM_INPUT_2 = "nname";
 const char* PARAM_INPUT_3 = "email";
 
+// In diesen Variablen werden die Daten bei der Registrierung dann gespeichert
 String inputvName;
 String inputnName;
 String inputEmail;
 
 String current_msg;
 
+// Hier werden die aktuellen Personen gezählt.
 int person_counter = 0;
+
+// Das ist die "Stellschraube für die maximale Personenanzahl"
 const byte MAX_PERSONS = 20;
 
+// Variablen für die Turingmaschine
 char band[] = {
         '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#',
         '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'
@@ -49,7 +58,7 @@ short position = 1;
 int flag = 0;
 boolean result;
 
-// HTML web page to handle 3 input fields (input1, input2, input3)
+// HTML-Code der Website
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html><head>
   <title>ESP Input Form</title>
@@ -63,14 +72,18 @@ const char index_html[] PROGMEM = R"rawliteral(
   </form><br>
 </body></html>)rawliteral";
 
+
+// Was soll gesendet werden, wenn eine falsche URL eingegeben wird
 void notFound(AsyncWebServerRequest *request) {
   request->send(404, "text/plain", "Not found");
 }
 
 
 void setup() {
-  Serial.begin(115200);
+  // I2C Bus als Master beitreten
   Wire.begin();
+  
+  // Initiieren der LCDs
   lcd1.init();
   delay(20);   
   lcd2.init();                   
@@ -78,32 +91,37 @@ void setup() {
   lcd1.backlight();
   delay(20);                    
   lcd2.backlight();
+
+  // Starten des Accesspoints
   WiFi.softAP(ssid);
+  
+  // Initialisiern der RTC
   rtc.begin();
-  IPAddress IP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(IP);
+
+  // Initialisierung der SD-Karte
   SD.begin(5);
 
+  // Die Pins für die Nano Signale für die Servos
   pinMode(digComAusgang, OUTPUT);
   pinMode(digComEingang, OUTPUT);
 
+  // Erster Code (für die nächste Registrierung) wird schonmal generiert
   randomSeed(analogRead(0));
   do {
      number_to_compare = (String)genCode();
   } while(code_already_exists(number_to_compare));
   current_msg = "" + number_to_compare + "|";  
 
-    // Send web page with input fields to client
+  // Bereitstellen der Website
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html);
   });
 
 
-  // Send a GET request to <ESP_IP>/get?input1=<inputMessage>
+  // Was passiert wenn Daten vom ESP ankommen
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
     String inputParam;
-    // GET input1 value on <ESP_IP>/get?input1=<inputMessage>
+    // Eingegebene Daten werden ausgelesen
     if (request->hasParam(PARAM_INPUT_1) && request->hasParam(PARAM_INPUT_2) && request->hasParam(PARAM_INPUT_3)) {
       inputvName = request->getParam(PARAM_INPUT_1)->value();
       inputnName = request->getParam(PARAM_INPUT_2)->value();
@@ -116,7 +134,7 @@ void setup() {
     }
     
     long zeit = get_unixtime();
-    // Build complete string
+    // Kompletten Datenbank-String zusammenbauen
     current_msg += inputvName;
     current_msg += '|';
     current_msg += inputnName;
@@ -127,14 +145,14 @@ void setup() {
     current_msg += '|';
     current_msg += (String)zeit;
     current_msg += "|0";
-    // write the user
+    // Auf SD-Karte schreiben
     write_string_to_EOF(current_msg);
-    // Tell user his data
+    // Bestätigung an Nutzer senden
     request->send(200, "text/html", "HTTP GET request sent to your ESP on input field (" 
                                      + inputParam + ") with value: " + inputvName + ", " + inputnName + ", " + inputEmail + 
                                      "<br>Dein Code fuer das G.A.T.E. lautet " + number_to_compare + 
                                      "<br><a href=\"/\">Return to Home Page</a>");
-    // Reset everything back to start
+    // Zurücksetzen und auf nächsten Nutzer vorbereiten
     do {
        number_to_compare = (String)genCode();
     } while(code_already_exists(number_to_compare));
@@ -146,78 +164,81 @@ void setup() {
 }
 
 void loop(){
-  // ask nano 1 for new code
+  // Nano 1 nach neuem Code fragen
   received_number = "";
-  Wire.requestFrom(1, 6);    // request 7 bytes from slave device #1
-  while (Wire.available()) { // slave may send less than requested
+  Wire.requestFrom(1, 6);    //7 Bytes vom "Eingangs"-Arduino abfragen
+  while (Wire.available()) {
     byte temp = Wire.read();
-    Serial.println((char)temp);
-    received_number += (char)temp; // receive a byte as character   
+    received_number += (char)temp; // Direkt als Zeichen casten
   }
-  Serial.println(received_number);
 
+  // Auf Eingangs-Display anzeigen
   lcd1.clear();
   lcd1.setCursor(0, 0);
   lcd1.print("Code eingeben:");
   lcd1.setCursor(0, 1);
   lcd1.print(received_number.substring(0, 5));
   
+  // Wenn jemand eine Eingabe bestätigt hat
   if (received_number.substring(5) == "y") {
-    // Someone wants to get in
     char temp[5];
+	// Aufsplitten der Nachricht
     for (int i = 0; i<5; i++){
       temp[i] = received_number.charAt(i);
     }
-    // Check if tm validates the code
+    // Prüfung durch Turingmaschine
     if (tm(temp)) {
-      // Check db if user is registered
+      // Prüfung ob der Nutzer existiert
       if (code_already_exists(received_number.substring(0, 5))) {
-        // Check db if user is already in
+        // Prüfung ob der Nutzer schon im Gebäude ist
         if (!is_inside(received_number.substring(0, 5))) {
-          // Check if person_counter is low enough for one more person to enter the building
+          // Prüfung ob noch Platz im Gebäude ist
           if (person_counter < MAX_PERSONS) {
-            // Display confirmation
+            // Bestätigung anzeigen
             lcd1.clear();
             lcd1.setCursor(0, 0);
             lcd1.print("***Akzeptiert***");
             lcd1.setCursor(0, 1);
             lcd1.print("Oeffne Tuer");
-            //open doors
+            //Schranken öffnen
             digitalWrite(digComEingang, HIGH);
             delay(1000);
             digitalWrite(digComEingang, LOW);
             delay(1000);
-            // Wait for person to enter
   
-            // Update display
+            // Display aktualisieren
             lcd1.clear();
             lcd1.setCursor(0, 0);
             lcd1.print("***Drinnen***");
             lcd1.setCursor(0, 1);
             lcd1.print("Schliesse Tuer");
-            // Update db
+            // Datenbank aktualisieren
             toggle_user(received_number.substring(0, 5));
-            // Change counter
+            // Zähler aktualisieren
             person_counter++;
           }
+		  // Fehlermeldung wenn kein Platz im Gebäude ist
           else {
             lcd1.clear();
             lcd1.setCursor(0, 0);
             lcd1.print("Restaurant ist voll");
           }
         }
+		// Fehlermeldung wenn der Nutzer eigentlich schon drin ist
         else {
           lcd1.clear();
           lcd1.setCursor(0, 0);
           lcd1.print("Code abgelehnt");
         }
       }
+	  // Fehlermeldung wenn der Nutzer nicht im System existiert
       else {
         lcd1.clear();
         lcd1.setCursor(0, 0);
         lcd1.print("Code falsch");
       }
     }
+	// Fehlermeldung wenn die Turingmaschine nicht bestätigt
     else {
       lcd1.clear();
       lcd1.setCursor(0, 0);
@@ -225,70 +246,74 @@ void loop(){
     }
   }
   delay(500);
-  // ask nano 2 for new code
+  
+  // Nano 2 nach neuem Code fragen
   received_number = "";
-  Wire.requestFrom(2, 6);    // request 7 bytes from slave device #1
+  Wire.requestFrom(2, 6);    //7 Bytes vom "Ausgangs"-Arduino abfragen
   while (Wire.available()) { // slave may send less than requested
     byte temp = Wire.read();
-    Serial.println((char)temp);
-    received_number += (char)temp; // receive a byte as character   
+    received_number += (char)temp; // Direkt als Zeichen casten
   }
-  Serial.println(received_number);
 
+  // Auf Ausgangs-Display anzeigen
   lcd2.clear();
   lcd2.setCursor(0, 0);
   lcd2.print("Code eingeben:");
   lcd2.setCursor(0, 1);
   lcd2.print(received_number.substring(0, 5));
   
+  // Wenn jemand eine Eingabe bestätigt hat
   if (received_number.substring(5) == "y") {
-    // Someone wants to get out
     char temp[5];
+	// Aufsplitten der Nachricht
     for (int i = 0; i<5; i++){
       temp[i] = received_number.charAt(i);
     }
-    // Check if tm validates the code
+    // Prüfung durch Turingmaschine
     if (tm(temp)) {
-      // Check db if user is registered
+      // Prüfung ob der Nutzer existiert
       if (code_already_exists(received_number.substring(0, 5))) {
-        // Check db if user is actually in
+        // Prüfung ob der Nutzer tatsächlich im Gebäude ist
         if (is_inside(received_number.substring(0, 5))) {
-          // Display confirmation
+          // Bestätigung anzeigen
           lcd2.clear();
           lcd2.setCursor(0, 0);
           lcd2.print("***Akzeptiert***");
           lcd2.setCursor(0, 1);
           lcd2.print("Oeffne Tuer");
-          // Open the gates
+          //Schranken öffnen
           digitalWrite(digComAusgang, HIGH);
           delay(1000);
           digitalWrite(digComAusgang, LOW);
           delay(1000);
           // Wait for person to enter
 
-          // Update display
+          // Display aktualisieren
           lcd2.clear();
           lcd2.setCursor(0, 0);
           lcd2.print("***Draußen***");
           lcd2.setCursor(0, 1);
           lcd2.print("Schliesse Tuer");
-          // Update db
+          // Datenbank aktualisieren
           toggle_user(received_number.substring(0, 5));
-          // Change counter
+          // Zähler aktualisieren
           person_counter--;
         }
+		// Fehlermeldung wenn der Nutzer nicht drin ist
         else {
           lcd2.clear();
           lcd2.setCursor(0, 0);
           lcd2.print("Code abgelehnt");
         }
       }
+	  // Fehlermeldung wenn der Nutzer nicht im System existiert
       else {
         lcd2.clear();
         lcd2.setCursor(0, 0);
         lcd2.print("Code falsch");
       }
     }
+	// Fehlermeldung wenn die Turingmaschine nicht bestätigt
     else {
       lcd2.clear();
       lcd2.setCursor(0, 0);
@@ -298,8 +323,11 @@ void loop(){
   delay(500);
 }
 
+// Diese Funktion nimmt eine Zeichenkette als Parameter und schreibt diese
+// ans Ende der aktuellen Datenbankdatei
 void write_string_to_EOF(String to_write) {
   File myFile;
+  // Welche der Dateien existiert gerade
   if (SD.exists("/data.txt")) {
     myFile = SD.open("/data.txt", FILE_WRITE);
   }
@@ -309,23 +337,22 @@ void write_string_to_EOF(String to_write) {
   else {
     myFile = SD.open("/data.txt", FILE_WRITE);
   }
+  // Schreiben
   if (myFile) {
-    
     myFile.seek(myFile.size());
     myFile.println(to_write);
     myFile.close();
-    Serial.println("done.");
-  } else {
-    Serial.println("error opening test.txt");
   }
 }
 
+// Diese Funktion nimmt eine Zeichenkette als Paramter und überprüft die aktuelle
+// Datenbankdatei und liefert wahr als Rückgabewert wenn diese Zeichenkette als Code existiert
 boolean code_already_exists(String to_compare) {
-  Serial.println("yeet it");
   byte next_zeichen;
   boolean skip_flag = false;
   String current_code;
   File myFile;
+  // Welche der Dateien existiert gerade
   if (SD.exists("/data.txt")) {
     myFile = SD.open("/data.txt");
   }
@@ -335,53 +362,66 @@ boolean code_already_exists(String to_compare) {
 
   while (myFile.available()) {
     next_zeichen = (byte)myFile.read();
+	// Wenn ein Trennzeichen gelesen wurde
     if (next_zeichen == 124) {
+	  // Wenn wir nicht gerade mittendrin sind
       if (!skip_flag) {
+		// Wenn das gelesene mit dem Parameter übereinstimmt
         if (to_compare == current_code) {
           myFile.close();
           return true;
         }
-        Serial.println(current_code);
         current_code = "";
       }
       skip_flag = true;
     }
+	// Wenn wir tatsächlich gerade am Anfang einer Zeile sind (Wo der Code steht)
     if (!skip_flag) {
+	  // Wenn da eine Zahl steht
       if (isDigit((char)next_zeichen)) {
+		// Eine Ziffer des Codes der Zeile
         current_code += (char)next_zeichen;
       }
     }
+	// Wenn wir das Ende einer Zeile erreicht haben
     if (next_zeichen == 13) {
+	  // Zurücksetzen der flag, dass jetzt theoretisch wieder ein Code ausgelesen werden kann
       skip_flag = false;
     }
   }
+  // Standardmäßig falsch
   myFile.close();
   return false;  
 }
 
+
+// Diese Funktion nimmt eine Zeichenkette als Paramter und überprüft die aktuelle
+// Datenbankdatei und liefert wahr als Rückgabewert wenn diese Zeichenkette als Code existiert
+// und wenn der Besitzer dieser Zeichenkette sich gerade im Gebäude befindet
 boolean is_inside(String user_string) {
   byte next_zeichen;
   bool skip_flag = false;
   String current_code;
   bool result;
   File myFile;
+  // Welche der Dateien existiert gerade
   if (SD.exists("/data.txt")) {
     myFile = SD.open("/data.txt");
   }
   else if (SD.exists("/data2.txt")) {
     myFile = SD.open("/data2.txt");
   }
-  Serial.println(myFile.name());
 
   while (myFile.available()) {
     next_zeichen = (byte)myFile.read();
+	// Wenn ein Trennzeichen gelesen wurde
     if (next_zeichen == 124) {
+		// Wenn wir nicht gerade mittendrin sind
       if (!skip_flag) {
+		// Wenn das gelesene mit dem Parameter übereinstimmt
         if (user_string == current_code) {
-          // Correct user found
-          Serial.println("Correct code found");
           short counter = 0;
-          // Continue reading, until you read 5 more "|"
+          // Weiterlesen, bis 5 weitere Trennzeichen gelesen wurden
           do {
             next_zeichen = (byte)myFile.read();
             if (next_zeichen == 124) {
@@ -389,20 +429,16 @@ boolean is_inside(String user_string) {
             }
           } while (counter != 5);
           char temp = (char)myFile.read();
-          Serial.println(temp);
+		  // Überprüfung ob da eine 0 oder 1 steht
           if (temp == '0') {
-            Serial.println("Der ist draußen");
             result = false;
           }
           else if (temp == '1') {
-            Serial.println("Der ist drinnen");
             result = true;
           }
-          Serial.println(result);
           myFile.close();
           return result;
         }
-        Serial.println(current_code);
         current_code = "";
       }
       skip_flag = true;
@@ -420,19 +456,22 @@ boolean is_inside(String user_string) {
   return false;  
 }
 
+
+// Diese Funktion nimmt eine Zeichenkette als Paramter und überprüft die aktuelle
+// Datenbankdatei ob diese Zeichenkette als Code existiert und ändert den "Status"
+// Des Nutzers -> ob ersich im Gebäude befindet oder nicht
 void toggle_user(String user_string) {
   byte next_zeichen;
   boolean skip_flag = false;
   String current_code;
   File oldFile;
   File newFile;
+  // Überprüfung welche der Dateien existiert und Erstellung der anderen
   if (SD.exists("/data.txt")) {
-    Serial.println("Wir sind bei der ersten Datei");
     oldFile = SD.open("/data.txt");
     newFile = SD.open("/data2.txt", FILE_WRITE);
   }
   else if (SD.exists("/data2.txt")) {
-    Serial.println("Wir sind bei der zweiten Datei");
     oldFile = SD.open("/data2.txt");
     newFile = SD.open("/data.txt", FILE_WRITE);
   }
@@ -443,16 +482,16 @@ void toggle_user(String user_string) {
     if (next_zeichen == 124) {
       if (!skip_flag) {
         if (user_string == current_code) {
-          // Correct user found
           short counter = 0;
-          // Continue reading, until you read 5 more "|"
           do {
             next_zeichen = (byte)oldFile.read();
+			// Alles erstmal übernehmen
             newFile.print((char)next_zeichen);
             if (next_zeichen == 124) {
               counter++;
             }
           } while (counter != 5);
+		  // Ersetzen der "Status" Variable
           char old = (char)oldFile.read();
           if (old == '1') {
             newFile.print(0);
@@ -461,7 +500,6 @@ void toggle_user(String user_string) {
             newFile.print(1);
           }
         }
-        Serial.println(current_code);
         current_code = "";
       }
       skip_flag = true;
@@ -476,8 +514,8 @@ void toggle_user(String user_string) {
     }
   }
   
+  // Alte Datei löschen, neue speichern
   String oldFileName = oldFile.name();
-  Serial.println(oldFileName);
   oldFile.close();
   newFile.close();
   if (oldFileName == "/data.txt") {
@@ -488,6 +526,7 @@ void toggle_user(String user_string) {
   } 
 }
 
+// Diese Funktion generiert einen theoretisch möglichen Code der eine korrekte Quersumme hat
 long genCode() {
   long tenthousand = 10000;
   long random1 = random(1, 10);
@@ -505,13 +544,14 @@ long genCode() {
   return codehilf;
 }
 
+// Diese Funktion gibt den aktuellen UnixZeitstempel von der RTC wieder
 long get_unixtime() {
   rtc.isrunning();
   DateTime now = rtc.now();
   return now.unixtime();
 }
 
-//TM
+// Implementierung der Turingmaschine
 bool tm(char input[]) {
     reset_tm();
     const char NONE = 'N';
@@ -527,16 +567,11 @@ bool tm(char input[]) {
     int next_state;
     char next_move;
     while (true) {
-       //Serial.println(band);
        read_value = band[position];
-       //Serial.print("read");
-       //Serial.println(read_value);
        write_value = get_write_value(state, read_value);
        if (write_value == '-1') {
            return false;
        }
-       //Serial.print("write");
-       //Serial.println(write_value);
        next_state = get_next_state(state, read_value);
        if (next_state == final_state) {
            return true;
@@ -544,14 +579,10 @@ bool tm(char input[]) {
        else if (next_state == -1) {
            return false;
        }
-       //Serial.print("state");
-       //Serial.println(next_state);
         next_move = get_next_move(state, read_value);
         if (next_move == '-1') {
             return false;
         }
-       //Serial.print("move");
-       //Serial.println(next_move);
         band[position] = write_value;
         state = next_state;
         if (next_move == NONE) {

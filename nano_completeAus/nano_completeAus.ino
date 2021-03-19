@@ -2,31 +2,37 @@
 #include <Keypad.h>
 #include <Servo.h>
 
-Servo servo1; //servo
+// Servos
+Servo servo1;
 Servo servo2;
 
-boolean turzu = false;
-
-int trigPin = 10; //abstandssensor
+// Abstandssensoren
+int trigPin = 10;
 int echoPin = 11;
+// Variablen für die Ultraschallsensoren
 long duration;
 int distance;
 
-int comPin = 12;  //für dig-com
+//Hier kommt das Signal vom ESP für die Servos an
+int comPin = 12;
+// Servo Variablen 
 boolean turauf = false;
-boolean checkSchranke =false;
-long myTimer =0;
+boolean turzu = false;
+boolean checkSchranke = false;
+long myTimer = 0;
 long myTimeout = 2000;
 
+// Speicherung der Eingaben
 char lastCode[6] = {'#', '#', '#', '#', '#', 'n'};
 
-const byte ROWS =4;               //4x4-Keypad
+// Variablen für das Zahlenfeld
+const byte ROWS = 4;               //4x4-Keypad
 const byte COLS = 4;
 char keys[ROWS][COLS] = {
-  {'1','2','3','A'},
-  {'4','5','6','B'},
-  {'7','8','9','C'},
-  {'*','0','#','D'}
+  {'1', '2', '3', 'A'},
+  {'4', '5', '6', 'B'},
+  {'7', '8', '9', 'C'},
+  {'*', '0', '#', 'D'}
 };
 byte rowPins[ROWS] = {2, 3, 4, 5}; 
 byte colPins[COLS] = {6,7,8,9}; 
@@ -35,43 +41,33 @@ Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 char eingabe[5] = {'#', '#', '#', '#', '#'};  //array für Code eingabe (# = unbelegt)
 boolean arrayvoll = false;                    //boolean für check, ob array voll ist
 
-char band[] = {                                                     //turing
-        '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#',
-        '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'
-        };
-short position = 1;
-
-int flag = 0;
-boolean result;
-
 char validation_char = 'n';
 
 void setup() {
-  // put your setup code here, to run once:
+    // I2C Bus als Slave mit Adresse 2 beitreten
   Wire.begin(2);
   Wire.onRequest(requestEvent);
-  Serial.begin(9600);
   pinMode(trigPin, OUTPUT);  //Abstandssensor
   pinMode(echoPin, INPUT);   //Abstandssensor
-  pinMode(comPin, INPUT);
+  pinMode(comPin, INPUT);   // Verbindung zum ESP
+    // Noch beide Servos im Code, nur einer wird benutzt
   servo1.attach(A2);
   servo2.attach(A3);
+  // Sicherstellen, dass die zu sind
   servo1.write(170);
   servo2.write(20);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  
+  // Letzte Tastenfeld-Eingabe auslesen
   char key = keypad.getKey();
-  if (key){                                                //wenn Eingabe erfolgt ist:
+  if (key){
+    // Wenn Buchstabentasten, ignorieren
     if (key =='A' || key =='B' || key =='C' || key=='D'){   //Unbelegte Keys
-      Serial.println("falsche Eingabe");
-      
+      ;   
     } else if(key =='#') {                   //wenn Eingabe key(#) gedrückt
       //Eingabe wird überprüft:
-      lastCode[5] = 'y';
-      
+      lastCode[5] = 'y'; 
     } else if(key =='*'){           //wenn löschen-key(*) gedrückt wird
       //löscht letzte Eingabe
       for(int i = 0; i<5; i++) {
@@ -108,7 +104,7 @@ void loop() {
     lastCode[i] = eingabe[i];
   }
   delay(50);
-  //ab hier für dig-com
+  // Gucken ob der ESP will dass die Schrank aufgemacht wird
   if(digitalRead(comPin)){
     turauf =true;
   }
@@ -117,14 +113,17 @@ void loop() {
   }
 }
 
-//Tür-Öffner
+// Diese Methode öffnet die Schranke mit dem Servo
+// und lässt sie so lange offen wie die globale
+// Boolean dazu true ist
 void opendoor(){
-  servo1.write(50); //open
+  servo1.write(50);
   servo2.write(120);
   if(millis() > myTimeout + myTimer && !checkSchranke){
     myTimer = millis();
     checkSchranke = true;
   }
+  // US-Sensor ablesen
   if(checkSchranke){
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
@@ -133,22 +132,22 @@ void opendoor(){
     digitalWrite(trigPin, LOW);
     duration = pulseIn(echoPin, HIGH);
     distance = duration*0.034/2;
-    Serial.print("Distance: ");
-    Serial.println(distance);
     if(distance < 30){
       turzu = true;
       myTimer = millis();
     }
   }
+  // Durchgehen detected und kurz gewartet 
   if(millis() > myTimeout + myTimer && turzu){
     checkSchranke = false;
     turauf = false;
     turzu = false;
-    servo1.write(170);   //close
+    servo1.write(170);
     servo2.write(20);
   }
 }
 
+// Event wenn der ESP nach Code fragt
 void requestEvent(){
   for (int i = 0; i<6; i++){
     Serial.println(lastCode[i]);
@@ -160,6 +159,7 @@ void requestEvent(){
   }
 }
 
+// Diese Funktion resettet das Eingaben-Array
 void cleararray() {        //löscht alle eingegebenen Werte
   for(int i = 0; i<5; i++) {
     eingabe[i] = '#';
